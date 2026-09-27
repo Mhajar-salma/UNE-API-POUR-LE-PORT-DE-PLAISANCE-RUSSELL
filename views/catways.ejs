@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des catways</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    <h1>Liste des catways</h1>
+    <nav>
+      <a href="/dashboard">Tableau de bord</a>
+      <a href="/reservations-list">Réservations</a>
+    </nav>
+    <table>
+      <thead>
+        <tr><th>Numéro</th><th>Type</th><th>État</th></tr>
+      </thead>
+      <tbody id="catwaysBody"></tbody>
+    </table>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth();
+    (async () => {
+      const { status, data } = await apiCall('/catways', 'GET');
+      if (status === 200) {
+        const tbody = document.getElementById('catwaysBody');
+        data.forEach(c => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${c.catwayNumber}</td><td>${c.type}</td><td>${c.catwayState}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

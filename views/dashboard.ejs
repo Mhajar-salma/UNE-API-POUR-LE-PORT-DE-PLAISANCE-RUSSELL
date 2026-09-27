@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tableau de bord - Port de Plaisance Russell</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container" style="max-width: 900px;">
+    <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    <h1>Tableau de bord</h1>
+
+    <nav>
+      <a href="/catways-list">Liste des catways</a>
+      <a href="/reservations-list">Liste des réservations</a>
+      <a href="/documentation">Documentation API</a>
+    </nav>
+
+    <!-- Utilisateurs -->
+    <div class="form-section">
+      <h2>Créer un utilisateur</h2>
+      <form id="createUserForm">
+        <label>Nom</label>
+        <input type="text" id="cu-name" required>
+        <label>Email</label>
+        <input type="email" id="cu-email" required>
+        <label>Mot de passe</label>
+        <input type="password" id="cu-password" required>
+        <button type="submit">Créer</button>
+      </form>
+      <p id="cu-msg"></p>
+    </div>
+
+    <div class="form-section">
+      <h2>Modifier un utilisateur</h2>
+      <form id="updateUserForm">
+        <label>ID de l'utilisateur</label>
+        <input type="text" id="uu-id" required>
+        <label>Nom</label>
+        <input type="text" id="uu-name">
+        <label>Email</label>
+        <input type="email" id="uu-email">
+        <label>Nouveau mot de passe (optionnel)</label>
+        <input type="password" id="uu-password">
+        <button type="submit">Modifier</button>
+      </form>
+      <p id="uu-msg"></p>
+    </div>
+
+    <div class="form-section">
+      <h2>Supprimer un utilisateur</h2>
+      <form id="deleteUserForm">
+        <label>ID de l'utilisateur</label>
+        <input type="text" id="du-id" required>
+        <button type="submit">Supprimer</button>
+      </form>
+      <p id="du-msg"></p>
+    </div>
+
+    <!-- Catways -->
+    <div class="form-section">
+      <h2>Créer un catway</h2>
+      <form id="createCatwayForm">
+        <label>Numéro de catway</label>
+        <input type="number" id="cc-number" required>
+        <label>Type</label>
+        <select id="cc-type" required>
+          <option value="long">long</option>
+          <option value="short">short</option>
+        </select>
+        <label>État</label>
+        <input type="text" id="cc-state" required>
+        <button type="submit">Créer</button>
+      </form>
+      <p id="cc-msg"></p>
+    </div>
+
+    <div class="form-section">
+      <h2>Modifier l'état d'un catway</h2>
+      <form id="updateCatwayForm">
+        <label>Numéro de catway</label>
+        <input type="text" id="uc-id" required>
+        <label>Nouvel état</label>
+        <input type="text" id="uc-state" required>
+        <button type="submit">Modifier</button>
+      </form>
+      <p id="uc-msg"></p>
+    </div>
+
+    <div class="form-section">
+      <h2>Supprimer un catway</h2>
+      <form id="deleteCatwayForm">
+        <label>Numéro de catway</label>
+        <input type="text" id="dc-id" required>
+        <button type="submit">Supprimer</button>
+      </form>
+      <p id="dc-msg"></p>
+    </div>
+
+    <div class="form-section">
+      <h2>Afficher les détails d'un catway</h2>
+      <form id="detailCatwayForm">
+        <label>Numéro de catway</label>
+        <input type="text" id="dtc-id" required>
+        <button type="submit">Afficher</button>
+      </form>
+      <p id="dtc-msg"></p>
+    </div>
+
+    <!-- Réservations -->
+    <div class="form-section">
+      <h2>Enregistrer une réservation</h2>
+      <form id="createReservationForm">
+        <label>Numéro de catway</label>
+        <input type="text" id="cr-catway" required>
+        <label>Nom du client</label>
+        <input type="text" id="cr-client" required>
+        <label>Nom du bateau</label>
+        <input type="text" id="cr-boat" required>
+        <label>Date d'arrivée</label>
+        <input type="date" id="cr-checkin" required>
+        <label>Date de départ</label>
+        <input type="date" id="cr-checkout" required>
+        <button type="submit">Réserver</button>
+      </form>
+      <p id="cr-msg"></p>
+    </div>
+
+    <div class="form-section">
+      <h2>Supprimer une réservation</h2>
+      <form id="deleteReservationForm">
+        <label>Numéro de catway</label>
+        <input type="text" id="dr-catway" required>
+        <label>ID de la réservation</label>
+        <input type="text" id="dr-id" required>
+        <button type="submit">Supprimer</button>
+      </form>
+      <p id="dr-msg"></p>
+    </div>
+
+    <div class="form-section">
+      <h2>Afficher les détails d'une réservation</h2>
+      <form id="detailReservationForm">
+        <label>Numéro de catway</label>
+        <input type="text" id="dtr-catway" required>
+        <label>ID de la réservation</label>
+        <input type="text" id="dtr-id" required>
+        <button type="submit">Afficher</button>
+      </form>
+      <p id="dtr-msg"></p>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth();
+
+    // --- Utilisateurs ---
+    document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { status, data } = await apiCall('/users', 'POST', {
+        name: document.getElementById('cu-name').value,
+        email: document.getElementById('cu-email').value,
+        password: document.getElementById('cu-password').value,
+      });
+      document.getElementById('cu-msg').textContent = status === 201
+        ? `Utilisateur créé (id: ${data._id})` : (data.error || 'Erreur');
+      document.getElementById('cu-msg').className = status === 201 ? 'success' : 'error';
+    });
+
+    document.getElementById('updateUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('uu-id').value;
+      const body = {};
+      if (document.getElementById('uu-name').value) body.name = document.getElementById('uu-name').value;
+      if (document.getElementById('uu-email').value) body.email = document.getElementById('uu-email').value;
+      if (document.getElementById('uu-password').value) body.password = document.getElementById('uu-password').value;
+      const { status, data } = await apiCall(`/users/${id}`, 'PUT', body);
+      document.getElementById('uu-msg').textContent = status === 200 ? 'Utilisateur modifié' : (data.error || 'Erreur');
+      document.getElementById('uu-msg').className = status === 200 ? 'success' : 'error';
+    });
+
+    document.getElementById('deleteUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('du-id').value;
+      const { status, data } = await apiCall(`/users/${id}`, 'DELETE');
+      document.getElementById('du-msg').textContent = status === 200 ? 'Utilisateur supprimé' : (data.error || 'Erreur');
+      document.getElementById('du-msg').className = status === 200 ? 'success' : 'error';
+    });
+
+    // --- Catways ---
+    document.getElementById('createCatwayForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const { status, data } = await apiCall('/catways', 'POST', {
+        catwayNumber: Number(document.getElementById('cc-number').value),
+        type: document.getElementById('cc-type').value,
+        catwayState: document.getElementById('cc-state').value,
+      });
+      document.getElementById('cc-msg').textContent = status === 201 ? 'Catway créé' : (data.error || 'Erreur');
+      document.getElementById('cc-msg').className = status === 201 ? 'success' : 'error';
+    });
+
+    document.getElementById('updateCatwayForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('uc-id').value;
+      const { status, data } = await apiCall(`/catways/${id}`, 'PUT', {
+        catwayState: document.getElementById('uc-state').value,
+      });
+      document.getElementById('uc-msg').textContent = status === 200 ? 'Catway modifié' : (data.error || 'Erreur');
+      document.getElementById('uc-msg').className = status === 200 ? 'success' : 'error';
+    });
+
+    document.getElementById('deleteCatwayForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('dc-id').value;
+      const { status, data } = await apiCall(`/catways/${id}`, 'DELETE');
+      document.getElementById('dc-msg').textContent = status === 200 ? 'Catway supprimé' : (data.error || 'Erreur');
+      document.getElementById('dc-msg').className = status === 200 ? 'success' : 'error';
+    });
+
+    document.getElementById('detailCatwayForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('dtc-id').value;
+      const { status, data } = await apiCall(`/catways/${id}`, 'GET');
+      document.getElementById('dtc-msg').textContent = status === 200
+        ? `N°${data.catwayNumber} - ${data.type} - ${data.catwayState}` : (data.error || 'Erreur');
+      document.getElementById('dtc-msg').className = status === 200 ? 'success' : 'error';
+    });
+
+    // --- Réservations ---
+    document.getElementById('createReservationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const catway = document.getElementById('cr-catway').value;
+      const { status, data } = await apiCall(`/catways/${catway}/reservations`, 'POST', {
+        clientName: document.getElementById('cr-client').value,
+        boatName: document.getElementById('cr-boat').value,
+        checkIn: document.getElementById('cr-checkin').value,
+        checkOut: document.getElementById('cr-checkout').value,
+      });
+      document.getElementById('cr-msg').textContent = status === 201
+        ? `Réservation créée (id: ${data._id})` : (data.error || 'Erreur');
+      document.getElementById('cr-msg').className = status === 201 ? 'success' : 'error';
+    });
+
+    document.getElementById('deleteReservationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const catway = document.getElementById('dr-catway').value;
+      const id = document.getElementById('dr-id').value;
+      const { status, data } = await apiCall(`/catways/${catway}/reservations/${id}`, 'DELETE');
+      document.getElementById('dr-msg').textContent = status === 200 ? 'Réservation supprimée' : (data.error || 'Erreur');
+      document.getElementById('dr-msg').className = status === 200 ? 'success' : 'error';
+    });
+
+    document.getElementById('detailReservationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const catway = document.getElementById('dtr-catway').value;
+      const id = document.getElementById('dtr-id').value;
+      const { status, data } = await apiCall(`/catways/${catway}/reservations/${id}`, 'GET');
+      document.getElementById('dtr-msg').textContent = status === 200
+        ? `${data.clientName} - ${data.boatName} (${data.checkIn} → ${data.checkOut})` : (data.error || 'Erreur');
+      document.getElementById('dtr-msg').className = status === 200 ? 'success' : 'error';
+    });
+  </script>
+</body>
+</html>

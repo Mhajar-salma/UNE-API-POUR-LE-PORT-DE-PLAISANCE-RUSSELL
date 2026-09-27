@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Port de Plaisance Russell - Accueil</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Port de Plaisance Russell</h1>
+    <p class="presentation">
+      Application de gestion des réservations de catways (appontements) du port de plaisance
+      de Russell. Cette API permet à la capitainerie de gérer les catways et les réservations
+      des usagers en toute sécurité.
+    </p>
+
+    <div class="login-box">
+      <h2>Connexion</h2>
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Se connecter</button>
+      </form>
+      <p id="errorMsg" class="error"></p>
+    </div>
+
+    <a href="/documentation" class="doc-link">Voir la documentation de l'API</a>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/users/authenticate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (res.status === 200) {
+          localStorage.setItem('token', data.token);
+          window.location.href = '/dashboard';
+        } else {
+          document.getElementById('errorMsg').textContent = data.error || 'Erreur de connexion';
+        }
+      } catch (err) {
+        document.getElementById('errorMsg').textContent = 'Erreur réseau';
+      }
+    });
+  </script>
+</body>
+</html>

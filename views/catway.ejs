@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Détail catway</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    <h1>Détail du catway</h1>
+    <nav>
+      <a href="/dashboard">Tableau de bord</a>
+      <a href="/catways-list">Liste des catways</a>
+    </nav>
+    <div id="content"></div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth();
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('content').textContent = 'Aucun catway spécifié (utilisez ?id=NUMERO)';
+        return;
+      }
+      const { status, data } = await apiCall(`/catways/${id}`, 'GET');
+      if (status === 200) {
+        document.getElementById('content').innerHTML = `
+          <p><strong>Numéro :</strong> ${data.catwayNumber}</p>
+          <p><strong>Type :</strong> ${data.type}</p>
+          <p><strong>État :</strong> ${data.catwayState}</p>
+        `;
+      } else {
+        document.getElementById('content').textContent = data.error || 'Catway non trouvé';
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des réservations</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    <h1>Liste des réservations</h1>
+    <nav>
+      <a href="/dashboard">Tableau de bord</a>
+      <a href="/catways-list">Catways</a>
+    </nav>
+    <table>
+      <thead>
+        <tr><th>Catway</th><th>Client</th><th>Bateau</th><th>Arrivée</th><th>Départ</th></tr>
+      </thead>
+      <tbody id="reservationsBody"></tbody>
+    </table>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth();
+    (async () => {
+      const { status, data: catways } = await apiCall('/catways', 'GET');
+      if (status !== 200) return;
+      const tbody = document.getElementById('reservationsBody');
+      for (const c of catways) {
+        const { status: s2, data: reservations } = await apiCall(`/catways/${c.catwayNumber}/reservations`, 'GET');
+        if (s2 === 200) {
+          reservations.forEach(r => {
+            const tr = document.createElement('tr');
+            const checkIn = new Date(r.checkIn).toLocaleDateString('fr-FR');
+            const checkOut = new Date(r.checkOut).toLocaleDateString('fr-FR');
+            tr.innerHTML = `<td>${r.catwayNumber}</td><td>${r.clientName}</td><td>${r.boatName}</td><td>${checkIn}</td><td>${checkOut}</td>`;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
